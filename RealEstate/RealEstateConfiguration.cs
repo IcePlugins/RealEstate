@@ -14,6 +14,7 @@ namespace ExtraConcentratedJuice.RealEstate
         public int paymentCheckIntervalInSeconds;
         public int feePaymentTimeInMinutes;
         public bool destroyStructuresOnEviction;
+        public bool disableBuildingIfNotInHome;
         public List<House> homes;
         public List<DisplayName> displayNames;
 
@@ -24,6 +25,7 @@ namespace ExtraConcentratedJuice.RealEstate
             paymentCheckIntervalInSeconds = 10;
             feePaymentTimeInMinutes = 1440;
             destroyStructuresOnEviction = false;
+            disableBuildingIfNotInHome = false;
 
             homes = new List<House>();
             displayNames = new List<DisplayName>();

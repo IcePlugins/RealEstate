@@ -53,14 +53,14 @@ namespace ExtraConcentratedJuice.RealEstate.Commands
                 return;
             }
 
-            if (RealEstate.manager.Homes.Any(x => x.Id == h.asset.id))
+            if (RealEstate.manager.Homes.Any(x => x.Id == h.asset.id && x.Position.GetVector3() == h.transform.position))
             {
                 RealEstate.manager.SetHousePrice(h.id, price);
                 UnturnedChat.Say(caller, RealEstate.instance.Translate("house_updated", RealEstate.instance.Configuration.Instance.currencySymbol, price));
             }
             else
             {
-                RealEstate.manager.AddHouse(new House(h.asset.id, price));
+                RealEstate.manager.AddHouse(new House(h.asset.id, price, h.transform.position));
                 UnturnedChat.Say(caller, RealEstate.instance.Translate("house_added", RealEstate.instance.Configuration.Instance.currencySymbol, price));
             }
         }

@@ -70,6 +70,7 @@
     <Compile Include="Commands\CommandRemoveHouse.cs" />
     <Compile Include="Entities\House.cs" />
     <Compile Include="Entities\DisplayName.cs" />
+    <Compile Include="Entities\SerializableVector3.cs" />
     <Compile Include="HouseManager.cs" />
     <Compile Include="RealEstateConfiguration.cs" />
     <Compile Include="Overrides\SimulateBarricadeOverride.cs" />

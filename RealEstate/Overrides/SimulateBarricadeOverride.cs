@@ -25,10 +25,17 @@ namespace ExtraConcentratedJuice.RealEstate.Overrides
             {
                 House house = RealEstate.manager.HouseFromPosition(GetValue<Vector3>(__instance, "point", BindingFlags.NonPublic | BindingFlags.Instance));
 
-                if (house != null && (house.OwnerId == null || house.OwnerId != null && house.OwnerId.Value != player.CSteamID.m_SteamID))
+                if (house == null && RealEstate.instance.Configuration.Instance.disableBuildingIfNotInHome)
                 {
                     __instance.player.equipment.dequip();
-                    UnturnedChat.Say(player, "You cannot place barricades in a house that does not belong to you.", Color.red);
+                    UnturnedChat.Say(player, RealEstate.instance.Translate("cant_build_outside"), Color.red);
+                    return false;
+                }
+
+                if (!HouseManager.HouseCheck(house, player))
+                {
+                    __instance.player.equipment.dequip();
+                    UnturnedChat.Say(player, RealEstate.instance.Translate("cant_place_barricades"), Color.red);
                     return false;
                 }
             }

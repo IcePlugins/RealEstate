@@ -119,7 +119,9 @@ namespace ExtraConcentratedJuice.RealEstate
         {
             foreach (List<LevelObject> o in LevelObjects.objects)
             {
-                LevelObject obj = o.Where(x => NullCheck(x)).FirstOrDefault(x => x.transform.GetComponent<Collider>().bounds.Contains(pos));
+                // Prevents road memes from memeing the house 
+                LevelObject obj = o.Where(x => NullCheck(x)).FirstOrDefault(x => x.transform.GetComponent<Collider>().bounds.Contains(pos) 
+                    && x.asset.type == EObjectType.LARGE && (x.asset.id < 2 || x.asset.id > 9));
 
                 if (obj != null)
                     return obj;
@@ -132,13 +134,28 @@ namespace ExtraConcentratedJuice.RealEstate
         {
             foreach (List<LevelObject> o in LevelObjects.objects)
             {
-                LevelObject obj = o.Where(x => NullCheck(x)).FirstOrDefault(x => x.transform.GetComponent<Collider>().bounds.Contains(pos));
+                LevelObject obj = o.Where(x => NullCheck(x)).FirstOrDefault(x => x.transform.GetComponent<Collider>().bounds.Contains(pos) 
+                    && Homes.Any(z => z.Position.GetVector3() == x.transform.position));
 
                 if (obj != null)
-                    return Homes.FirstOrDefault(x => x.Id == obj.asset.id);
+                    return Homes.FirstOrDefault(x => x.Id == obj.asset.id && x.Position.GetVector3() == obj.transform.position);
             }
 
             return null;
+        }
+
+        public static bool HouseCheck(House house, UnturnedPlayer player)
+        {
+            if (house == null)
+                return false;
+
+            if (house.OwnerId == null)
+                return false;
+
+            if (house.OwnerId.Value != player.CSteamID.m_SteamID)
+                return false;
+
+            return true;
         }
 
         private bool NullCheck(LevelObject o) => o.transform != null && o.transform.GetComponent<Collider>() != null;

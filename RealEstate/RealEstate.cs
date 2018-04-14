@@ -133,7 +133,10 @@ namespace ExtraConcentratedJuice.RealEstate
                 { "upkeep_payment", "You've paid {0}{1} for the upkeep of one of your homes." },
                 { "max_reached", "You have reached the maximum number of homes allocated to you. ({0})" },
                 { "abandoned", "You have abandoned this house." },
-                { "cannot_abandon", "This house doesn't even belong to you!" }
+                { "cannot_abandon", "This house doesn't even belong to you!" },
+                { "cant_place_barricades", "You cannot place barricades in a house that does not belong to you." },
+                { "cant_place_structures", "You cannot place structures in a house that does not belong to you." },
+                { "cant_build_outside", "Building outside of a house that you own has been disabled." }
             };
     }
 }
