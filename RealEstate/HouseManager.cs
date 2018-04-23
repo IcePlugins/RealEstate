@@ -52,9 +52,9 @@ namespace ExtraConcentratedJuice.RealEstate
             return plugin.Configuration.Instance.defaultMaxHomes;
         }
 
-        public void SetHousePrice(ushort id, decimal price)
+        public void SetHousePrice(ushort id, SerializableVector3 pos, decimal price)
         {
-            House home = Homes.FirstOrDefault(x => x.Id == id);
+            House home = Homes.FirstOrDefault(x => x.Id == id && pos.Equals(x.Position));
 
             if (home != null)
             {
@@ -63,9 +63,9 @@ namespace ExtraConcentratedJuice.RealEstate
             }
         }
 
-        public void SetHouseOwner(ushort id, ulong? ownerId)
+        public void SetHouseOwner(ushort id, SerializableVector3 pos, ulong? ownerId)
         {
-            House home = Homes.FirstOrDefault(x => x.Id == id);
+            House home = Homes.FirstOrDefault(x => x.Id == id && pos.Equals(x.Position));
 
             if (home != null)
             {

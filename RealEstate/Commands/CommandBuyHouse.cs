@@ -61,7 +61,7 @@ namespace ExtraConcentratedJuice.RealEstate.Commands
 
                 Uconomy.Instance.Database.IncreaseBalance(player.CSteamID.ToString(), -h.Price);
                 UnturnedChat.Say(caller, RealEstate.instance.Translate("house_purchased", RealEstate.instance.Configuration.Instance.currencySymbol, h.Price));
-                RealEstate.manager.SetHouseOwner(h.Id, player.CSteamID.m_SteamID);
+                RealEstate.manager.SetHouseOwner(h.Id, h.Position, player.CSteamID.m_SteamID);
             }
         }
     }

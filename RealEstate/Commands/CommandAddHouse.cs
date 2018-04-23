@@ -55,7 +55,7 @@ namespace ExtraConcentratedJuice.RealEstate.Commands
 
             if (RealEstate.manager.Homes.Any(x => x.Id == h.asset.id && x.Position.GetVector3() == h.transform.position))
             {
-                RealEstate.manager.SetHousePrice(h.id, price);
+                RealEstate.manager.SetHousePrice(h.id, new SerializableVector3(h.transform.position), price);
                 UnturnedChat.Say(caller, RealEstate.instance.Translate("house_updated", RealEstate.instance.Configuration.Instance.currencySymbol, price));
             }
             else

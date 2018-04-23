@@ -82,7 +82,7 @@ namespace ExtraConcentratedJuice.RealEstate
                         if (player != null)
                             UnturnedChat.Say(player, Translate("eviction_notice"), Color.red);
 
-                        manager.SetHouseOwner(x.Id, null);
+                        manager.SetHouseOwner(x.Id, x.Position, null);
                         continue;
                     }
 

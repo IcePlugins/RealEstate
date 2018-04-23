@@ -21,6 +21,14 @@ namespace ExtraConcentratedJuice.RealEstate.Entities
             Z = p.z;
         }
 
+        public override bool Equals(object obj)
+        {
+            if (obj is SerializableVector3 other && X == other.X && Y == other.Y && Z == other.Z)
+                return true;
+
+            return false;
+        }
+
         public Vector3 GetVector3() => new Vector3(X, Y, Z);
     }
 }

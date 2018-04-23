@@ -40,7 +40,7 @@ namespace ExtraConcentratedJuice.RealEstate.Commands
                 return;
             }
 
-            RealEstate.manager.SetHouseOwner(h.Id, null);
+            RealEstate.manager.SetHouseOwner(h.Id, h.Position, null);
             UnturnedChat.Say(caller, RealEstate.instance.Translate("eviction"));
         }
     }
