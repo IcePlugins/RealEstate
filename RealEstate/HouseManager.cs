@@ -70,13 +70,28 @@ namespace ExtraConcentratedJuice.RealEstate
             if (home != null)
             {
                 home.OwnerId = ownerId;
+                home.LastPaid = DateTime.Now;
+                plugin.Configuration.Save();
 
                 if (ownerId == null && plugin.Configuration.Instance.destroyStructuresOnEviction)
                 {
+                    LevelObject obj = null;
+
+                    foreach (List<LevelObject> o in LevelObjects.objects)
+                    {
+                        obj = o.Where(x => NullCheck(x)).FirstOrDefault(x => home.Position.GetVector3() == x.transform.position);
+
+                        if (obj != null)
+                            break;
+                    }
+
+                    if (obj == null)
+                        return;
+
                     foreach (BarricadeRegion r in BarricadeManager.regions)
                         for (int i = r.drops.Count - 1; i >= 0; i--)
                         {
-                            if (HouseFromPosition(r.drops.ElementAt(i).model.position) != home)
+                            if (!obj.transform.GetComponent<Collider>().bounds.Contains(r.drops.ElementAt(i).model.position))
                                 continue;
 
                             if (!BarricadeManager.tryGetInfo(r.drops.ElementAt(i).model, out byte x, out byte y, out ushort plant, out ushort index, out BarricadeRegion region))
@@ -94,7 +109,7 @@ namespace ExtraConcentratedJuice.RealEstate
                     foreach (StructureRegion r in StructureManager.regions)
                         for (int i = r.drops.Count - 1; i >= 0; i--)
                         {
-                            if (HouseFromPosition(r.drops.ElementAt(i).model.position) != home)
+                            if (!obj.transform.GetComponent<Collider>().bounds.Contains(r.drops.ElementAt(i).model.position))
                                 continue;
 
                             if (!StructureManager.tryGetInfo(r.drops.ElementAt(i).model, out byte x, out byte y, out ushort plant, out StructureRegion region, out StructureDrop index))
@@ -109,9 +124,6 @@ namespace ExtraConcentratedJuice.RealEstate
                             });
                         }
                 }
-
-                home.LastPaid = DateTime.Now;
-                plugin.Configuration.Save();
             }
         }
 

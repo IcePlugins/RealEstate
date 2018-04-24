@@ -26,6 +26,9 @@ namespace ExtraConcentratedJuice.RealEstate.Entities
             if (obj is SerializableVector3 other && X == other.X && Y == other.Y && Z == other.Z)
                 return true;
 
+            if (obj is Vector3 other3 && X == other3.x && Y == other3.y && Z == other3.z)
+                return true;
+
             return false;
         }
 
