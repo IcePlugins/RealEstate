@@ -23,6 +23,9 @@ namespace ExtraConcentratedJuice.RealEstate.Overrides
 
             if (GetValue<bool>(__instance, "isUsing", BindingFlags.NonPublic | BindingFlags.Instance))
             {
+                if (GetValue<InteractableVehicle>(__instance, "parentVehicle", BindingFlags.NonPublic | BindingFlags.Instance) != null && RealEstate.instance.Configuration.Instance.enableBuildingOnVehicles)
+                    return true;
+
                 House house = RealEstate.manager.HouseFromPosition(GetValue<Vector3>(__instance, "point", BindingFlags.NonPublic | BindingFlags.Instance));
 
                 if (house == null && RealEstate.instance.Configuration.Instance.disableBuildingIfNotInHome)
