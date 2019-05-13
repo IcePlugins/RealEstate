@@ -41,17 +41,7 @@ namespace ExtraConcentratedJuice.RealEstate
 
             HarmonyInstance harmony = HarmonyInstance.Create("pw.cirno.extraconcentratedjuice");
 
-            var orig = typeof(UseableStructure).GetMethod("simulate", BindingFlags.Instance | BindingFlags.Public);
-            var pre = typeof(SimulateStructureOverride).GetMethod("Prefix", BindingFlags.Static | BindingFlags.NonPublic);
-            var post = typeof(SimulateStructureOverride).GetMethod("Postfix", BindingFlags.Static | BindingFlags.NonPublic);
-
-            harmony.Patch(orig, new HarmonyMethod(pre), new HarmonyMethod(post));
-
-            var orig2 = typeof(UseableBarricade).GetMethod("simulate", BindingFlags.Instance | BindingFlags.Public);
-            var pre2 = typeof(SimulateBarricadeOverride).GetMethod("Prefix", BindingFlags.Static | BindingFlags.NonPublic);
-            var post2 = typeof(SimulateBarricadeOverride).GetMethod("Postfix", BindingFlags.Static | BindingFlags.NonPublic);
-
-            harmony.Patch(orig2, new HarmonyMethod(pre2), new HarmonyMethod(post2));
+            harmony.PatchAll(Assembly);
         }
 
         protected override void Unload()
