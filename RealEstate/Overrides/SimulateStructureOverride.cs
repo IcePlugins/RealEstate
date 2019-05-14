@@ -1,4 +1,5 @@
 ﻿using ExtraConcentratedJuice.RealEstate.Entities;
+using Harmony;
 using Rocket.API;
 using Rocket.Unturned.Chat;
 using Rocket.Unturned.Player;
@@ -8,8 +9,10 @@ using UnityEngine;
 
 namespace ExtraConcentratedJuice.RealEstate.Overrides
 {
+    [HarmonyPatch(typeof(UseableStructure), "simulate")]
     internal class SimulateStructureOverride
     {
+        [HarmonyPrefix]
         internal static bool Prefix(UseableStructure __instance, uint simulation, bool inputSteady)
         {
             UnturnedPlayer player = UnturnedPlayer.FromPlayer(__instance.player);
@@ -38,12 +41,6 @@ namespace ExtraConcentratedJuice.RealEstate.Overrides
 
             return true;
         }
-
-        internal static void PostFix()
-        {
-            // lol
-        }
-
         private static T GetValue<T>(UseableStructure instance, string name, BindingFlags flags) 
             => (T)typeof(UseableStructure).GetField(name, flags).GetValue(instance);
     }
