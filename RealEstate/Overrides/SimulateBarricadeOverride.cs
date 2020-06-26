@@ -1,14 +1,8 @@
 ﻿using ExtraConcentratedJuice.RealEstate.Entities;
 using HarmonyLib;
 using Rocket.API;
-using Rocket.Unturned.Chat;
 using Rocket.Unturned.Player;
 using SDG.Unturned;
-using Steamworks;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using UnityEngine;
 
 namespace ExtraConcentratedJuice.RealEstate.Overrides
@@ -35,7 +29,7 @@ namespace ExtraConcentratedJuice.RealEstate.Overrides
             if (house == null && RealEstate.instance.Configuration.Instance.disableBuildingIfNotInHome)
             {
                 __instance.player.equipment.dequip();
-                UnturnedChat.Say(player, RealEstate.instance.Translate("cant_build_outside"), Color.red);
+                RealEstate.instance.TellPlayer(player, RealEstate.instance.Translate("cant_build_outside"), Color.red);
                 return false;
             }
 
@@ -43,7 +37,7 @@ namespace ExtraConcentratedJuice.RealEstate.Overrides
                 return true;
                 
             __instance.player.equipment.dequip();
-            UnturnedChat.Say(player, RealEstate.instance.Translate("cant_place_barricades"), Color.red);
+            RealEstate.instance.TellPlayer(player, RealEstate.instance.Translate("cant_place_barricades"), Color.red);
             return false;
 
         }

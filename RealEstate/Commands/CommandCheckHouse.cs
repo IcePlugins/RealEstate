@@ -1,12 +1,8 @@
 ﻿using ExtraConcentratedJuice.RealEstate.Entities;
 using Rocket.API;
-using Rocket.Unturned.Chat;
 using Rocket.Unturned.Player;
-using SDG.Unturned;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using SDG.Unturned;
 using UnityEngine;
 
 namespace ExtraConcentratedJuice.RealEstate.Commands
@@ -37,14 +33,14 @@ namespace ExtraConcentratedJuice.RealEstate.Commands
 
             if (h == null)
             {
-                UnturnedChat.Say(caller, RealEstate.instance.Translate("registered_house_not_found"), Color.red);
+                RealEstate.instance.TellPlayer(player, "registered_house_not_found", Color.red);
                 return;
             }
 
             if (h.OwnerId != null)
-                UnturnedChat.Say(caller, RealEstate.instance.Translate("check_house_owned", RealEstate.manager.GetName(h.OwnerId.Value), RealEstate.instance.Configuration.Instance.currencySymbol, h.Price));
+                RealEstate.instance.TellPlayer(player, "check_house_owned", Palette.SERVER, RealEstate.manager.GetName(h.OwnerId.Value), RealEstate.instance.Configuration.Instance.currencySymbol, h.Price);
             else
-                UnturnedChat.Say(caller, RealEstate.instance.Translate("check_house_unowned", RealEstate.instance.Configuration.Instance.currencySymbol, h.Price));
+                RealEstate.instance.TellPlayer(player, "check_house_unowned", Palette.SERVER, RealEstate.instance.Configuration.Instance.currencySymbol, h.Price);
         }
     }
 }

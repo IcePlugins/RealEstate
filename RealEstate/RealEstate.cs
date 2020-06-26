@@ -4,17 +4,13 @@ using Rocket.Unturned;
 using Rocket.Unturned.Player;
 using SDG.Unturned;
 using System;
-using System.Collections.Generic;
+using System.Collections;
 using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Timers;
 using Rocket.API.Collections;
-using Rocket.Unturned.Chat;
 using UnityEngine;
-using ExtraConcentratedJuice.RealEstate.Overrides;
 using ExtraConcentratedJuice.RealEstate.Entities;
 using HarmonyLib;
+using Logger = Rocket.Core.Logging.Logger;
 
 namespace ExtraConcentratedJuice.RealEstate
 {
@@ -22,67 +18,66 @@ namespace ExtraConcentratedJuice.RealEstate
     {
         public static RealEstate instance;
         public static HouseManager manager;
-        private Timer timer;
 
         protected override void Load()
         {
             instance = this;
 
-            if (Configuration.Instance.feePaymentTimeInMinutes > 0)
-            {
-                timer = new Timer(1000 * Configuration.Instance.paymentCheckIntervalInSeconds);
-                timer.Elapsed += OnTimerElapsed;
-                timer.Start();
-            }
+            if (Configuration.Instance.feePaymentTimeInMinutes > 0) 
+                instance.StartCoroutine(PaymentCoroutine());
 
             U.Events.OnPlayerConnected += OnConnected;
 
             manager = new HouseManager(this);
 
             Harmony harmony = new Harmony("pw.cirno.extraconcentratedjuice");
-
             harmony.PatchAll(Assembly);
+            
+            Logger.Log("RealEstate by ExtraGayJuice loaded");
+            Logger.Log("Visit https://iceplugins.xyz/RealEstate for help");
         }
 
         protected override void Unload()
         {
-            if (timer != null)
-            {
-                timer.Elapsed -= OnTimerElapsed;
-                timer.Stop();
-            }
-
+            instance.StopCoroutine(PaymentCoroutine());
             U.Events.OnPlayerConnected -= OnConnected;
         }
 
-        private void OnTimerElapsed(object s, ElapsedEventArgs t)
+        private IEnumerator PaymentCoroutine()
         {
-            foreach (House x in Configuration.Instance.homes)
+            while (true)
             {
-                if (x.LastPaid == null || x.OwnerId == null)
-                    continue;
-
-                UnturnedPlayer player = PlayerTool.getPlayer(new Steamworks.CSteamID(x.OwnerId.Value)) == null ? null :
-                    UnturnedPlayer.FromCSteamID(new Steamworks.CSteamID(x.OwnerId.Value));
-
-                if ((DateTime.Now - x.LastPaid.Value).TotalMinutes > Configuration.Instance.feePaymentTimeInMinutes)
+                foreach (House x in Configuration.Instance.homes)
                 {
+                    if (x.LastPaid == null || x.OwnerId == null)
+                        continue;
+
+                    UnturnedPlayer player = PlayerTool.getPlayer(new Steamworks.CSteamID(x.OwnerId.Value)) == null
+                        ? null
+                        : UnturnedPlayer.FromCSteamID(new Steamworks.CSteamID(x.OwnerId.Value));
+
+                    if (!((DateTime.Now - x.LastPaid.Value).TotalMinutes > Configuration.Instance.feePaymentTimeInMinutes)) 
+                        continue;
+                    
                     if (Uconomy.Instance.Database.GetBalance(x.OwnerId.ToString()) < x.Price)
                     {
                         if (player != null)
-                            UnturnedChat.Say(player, Translate("eviction_notice"), Color.red);
+                            instance.TellPlayer(player, "eviction_notice", Color.red);
 
                         manager.SetHouseOwner(x.Id, x.Position, null);
                         continue;
                     }
 
                     if (player != null)
-                        UnturnedChat.Say(player, Translate("upkeep_payment", Configuration.Instance.currencySymbol, x.Price));
+                        instance.TellPlayer(player, "upkeep_payment", Palette.SERVER,
+                            Configuration.Instance.currencySymbol, x.Price);
 
                     Uconomy.Instance.Database.IncreaseBalance(x.OwnerId.ToString(), -x.Price);
                     x.LastPaid = DateTime.Now;
                     Configuration.Save();
                 }
+
+                yield return new WaitForSeconds(instance.Configuration.Instance.paymentCheckIntervalInSeconds);
             }
         }
 
@@ -92,17 +87,23 @@ namespace ExtraConcentratedJuice.RealEstate
 
             if (n != null)
             {
-                if (p.DisplayName != n.Name)
-                {
-                    n.Name = p.DisplayName;
-                    Configuration.Save();
-                }
+                if (p.DisplayName == n.Name)
+                    return;
+                
+                n.Name = p.DisplayName;
+                Configuration.Save();
             }
             else
             {
                 Configuration.Instance.displayNames.Add(new DisplayName(p.CSteamID.m_SteamID, p.DisplayName));
                 Configuration.Save();
             }
+        }
+
+        public void TellPlayer(UnturnedPlayer player, string translationKey, Color color, params object[] placeholders)
+        {
+            SteamPlayer realPlayer = player.Player.channel.owner;
+            ChatManager.serverSendMessage(instance.Translate(translationKey, placeholders), color, toPlayer: realPlayer);
         }
 
         public override TranslationList DefaultTranslations =>
@@ -126,7 +127,8 @@ namespace ExtraConcentratedJuice.RealEstate
                 { "cannot_abandon", "This house doesn't even belong to you!" },
                 { "cant_place_barricades", "You cannot place barricades in a house that does not belong to you." },
                 { "cant_place_structures", "You cannot place structures in a house that does not belong to you." },
-                { "cant_build_outside", "Building outside of a house that you own has been disabled." }
+                { "cant_build_outside", "Building outside of a house that you own has been disabled." },
+                { "command_add_syntax", "The correct syntax is /addhouse <price>" }
             };
     }
 }

@@ -1,12 +1,10 @@
 ﻿using ExtraConcentratedJuice.RealEstate.Entities;
 using Rocket.API;
-using Rocket.Unturned.Chat;
 using Rocket.Unturned.Player;
 using SDG.Unturned;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using UnityEngine;
 
 namespace ExtraConcentratedJuice.RealEstate.Commands
@@ -31,37 +29,37 @@ namespace ExtraConcentratedJuice.RealEstate.Commands
 
         public void Execute(IRocketPlayer caller, string[] args)
         {
+            UnturnedPlayer player = (UnturnedPlayer)caller;
+            
             if (args.Length < 1)
             {
-                UnturnedChat.Say(caller, Syntax, Color.red);
+                RealEstate.instance.TellPlayer(player, "command_add_syntax", Color.red);
                 return;
             }
 
             if (!Decimal.TryParse(args[0], out decimal price))
             {
-                UnturnedChat.Say(caller, Syntax, Color.red);
+                RealEstate.instance.TellPlayer(player, "command_add_syntax", Color.red);
                 return;
             }
-
-            UnturnedPlayer player = (UnturnedPlayer)caller;
 
             LevelObject h = RealEstate.manager.LevelObjectFromPosition(player.Position);
 
             if (h == null)
             {
-                UnturnedChat.Say(caller, RealEstate.instance.Translate("house_not_found"), Color.red);
+                RealEstate.instance.TellPlayer(player, "house_not_found", Color.red);
                 return;
             }
 
             if (RealEstate.manager.Homes.Any(x => x.Id == h.asset.id && x.Position.GetVector3() == h.transform.position))
             {
                 RealEstate.manager.SetHousePrice(h.id, new SerializableVector3(h.transform.position), price);
-                UnturnedChat.Say(caller, RealEstate.instance.Translate("house_updated", RealEstate.instance.Configuration.Instance.currencySymbol, price));
+                RealEstate.instance.TellPlayer(player, "house_updated", Palette.SERVER, RealEstate.instance.Configuration.Instance.currencySymbol, price);
             }
             else
             {
                 RealEstate.manager.AddHouse(new House(h.asset.id, price, h.transform.position));
-                UnturnedChat.Say(caller, RealEstate.instance.Translate("house_added", RealEstate.instance.Configuration.Instance.currencySymbol, price));
+                RealEstate.instance.TellPlayer(player, "house_added", Palette.SERVER, RealEstate.instance.Configuration.Instance.currencySymbol, price);
             }
         }
     }

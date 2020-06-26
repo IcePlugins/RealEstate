@@ -1,12 +1,9 @@
 ﻿using ExtraConcentratedJuice.RealEstate.Entities;
 using fr34kyn01535.Uconomy;
 using Rocket.API;
-using Rocket.Unturned.Chat;
 using Rocket.Unturned.Player;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using SDG.Unturned;
 using UnityEngine;
 
 namespace ExtraConcentratedJuice.RealEstate.Commands
@@ -37,7 +34,7 @@ namespace ExtraConcentratedJuice.RealEstate.Commands
 
             if (h == null)
             {
-                UnturnedChat.Say(caller, RealEstate.instance.Translate("registered_house_not_found"), Color.red);
+                RealEstate.instance.TellPlayer(player, "registered_house_not_found", Color.red);
                 return;
             }
 
@@ -45,22 +42,22 @@ namespace ExtraConcentratedJuice.RealEstate.Commands
 
             if (RealEstate.manager.CountPlayerHouses(player.CSteamID.m_SteamID) >= max)
             {
-                UnturnedChat.Say(caller, RealEstate.instance.Translate("max_reached", max), Color.red);
+                RealEstate.instance.TellPlayer(player, "max_reached", Color.red, max);
                 return;
             }
 
             if (h.OwnerId != null)
-                UnturnedChat.Say(caller, RealEstate.instance.Translate("owner_exists"));
+                RealEstate.instance.TellPlayer(player, "owner_exists", Palette.SERVER);
             else
             {
                 if (Uconomy.Instance.Database.GetBalance(player.CSteamID.ToString()) < h.Price)
                 {
-                    UnturnedChat.Say(caller, RealEstate.instance.Translate("cannot_afford", RealEstate.instance.Configuration.Instance.currencySymbol, h.Price), Color.red);
+                    RealEstate.instance.TellPlayer(player, "cannot_afford", Color.red, RealEstate.instance.Configuration.Instance.currencySymbol, h.Price);
                     return;
                 }
 
                 Uconomy.Instance.Database.IncreaseBalance(player.CSteamID.ToString(), -h.Price);
-                UnturnedChat.Say(caller, RealEstate.instance.Translate("house_purchased", RealEstate.instance.Configuration.Instance.currencySymbol, h.Price));
+                RealEstate.instance.TellPlayer(player, "house_purchased", Palette.SERVER, RealEstate.instance.Configuration.Instance.currencySymbol, h.Price);
                 RealEstate.manager.SetHouseOwner(h.Id, h.Position, player.CSteamID.m_SteamID);
             }
         }
