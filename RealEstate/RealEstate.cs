@@ -1,5 +1,4 @@
 ﻿using fr34kyn01535.Uconomy;
-using Harmony;
 using Rocket.Core.Plugins;
 using Rocket.Unturned;
 using Rocket.Unturned.Player;
@@ -15,6 +14,7 @@ using Rocket.Unturned.Chat;
 using UnityEngine;
 using ExtraConcentratedJuice.RealEstate.Overrides;
 using ExtraConcentratedJuice.RealEstate.Entities;
+using HarmonyLib;
 
 namespace ExtraConcentratedJuice.RealEstate
 {
@@ -39,7 +39,7 @@ namespace ExtraConcentratedJuice.RealEstate
 
             manager = new HouseManager(this);
 
-            HarmonyInstance harmony = HarmonyInstance.Create("pw.cirno.extraconcentratedjuice");
+            Harmony harmony = new Harmony("pw.cirno.extraconcentratedjuice");
 
             harmony.PatchAll(Assembly);
         }
