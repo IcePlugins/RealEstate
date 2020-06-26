@@ -45,86 +45,92 @@ namespace ExtraConcentratedJuice.RealEstate
         {
             Permission per = p.GetPermissions().FirstOrDefault(x => x.Name.StartsWith("realestate.maxhouses."));
 
-            if (per != null)
-                if (int.TryParse(per.Name.Split('.').Last(), out int max))
-                    return max;
-
-            return plugin.Configuration.Instance.defaultMaxHomes;
+            if (per == null)
+                return plugin.Configuration.Instance.defaultMaxHomes;
+            
+            return int.TryParse(per.Name.Split('.').Last(), out int max) ? max : plugin.Configuration.Instance.defaultMaxHomes;
         }
 
         public void SetHousePrice(ushort id, SerializableVector3 pos, decimal price)
         {
             House home = Homes.FirstOrDefault(x => x.Id == id && pos.Equals(x.Position));
 
-            if (home != null)
-            {
-                home.Price = price;
-                plugin.Configuration.Save();
-            }
+            if (home == null) 
+                return;
+            
+            home.Price = price;
+            plugin.Configuration.Save();
         }
 
         public void SetHouseOwner(ushort id, SerializableVector3 pos, ulong? ownerId)
         {
             House home = Homes.FirstOrDefault(x => x.Id == id && pos.Equals(x.Position));
 
-            if (home != null)
+            if (home == null)
+                return;
+
+            home.OwnerId = ownerId;
+            home.LastPaid = DateTime.Now;
+            plugin.Configuration.Save();
+
+            if (ownerId != null || !plugin.Configuration.Instance.destroyStructuresOnEviction)
+                return;
+
+            LevelObject obj = null;
+
+            foreach (List<LevelObject> o in LevelObjects.objects)
             {
-                home.OwnerId = ownerId;
-                home.LastPaid = DateTime.Now;
-                plugin.Configuration.Save();
+                obj = o.Where(x => NullCheck(x))
+                    .FirstOrDefault(x => home.Position.GetVector3() == x.transform.position);
 
-                if (ownerId == null && plugin.Configuration.Instance.destroyStructuresOnEviction)
-                {
-                    LevelObject obj = null;
-
-                    foreach (List<LevelObject> o in LevelObjects.objects)
-                    {
-                        obj = o.Where(x => NullCheck(x)).FirstOrDefault(x => home.Position.GetVector3() == x.transform.position);
-
-                        if (obj != null)
-                            break;
-                    }
-
-                    if (obj == null)
-                        return;
-
-                    foreach (BarricadeRegion r in BarricadeManager.regions)
-                        for (int i = r.drops.Count - 1; i >= 0; i--)
-                        {
-                            if (!obj.transform.GetComponent<Collider>().bounds.Contains(r.drops.ElementAt(i).model.position))
-                                continue;
-
-                            if (!BarricadeManager.tryGetInfo(r.drops.ElementAt(i).model, out byte x, out byte y, out ushort plant, out ushort index, out BarricadeRegion region))
-                                continue;
-
-                            BarricadeManager.instance.channel.send("tellTakeBarricade", ESteamCall.ALL, ESteamPacket.UPDATE_RELIABLE_BUFFER, new object[]
-                            {
-                                x,
-                                y,
-                                plant,
-                                index
-                            });
-                        }
-
-                    foreach (StructureRegion r in StructureManager.regions)
-                        for (int i = r.drops.Count - 1; i >= 0; i--)
-                        {
-                            if (!obj.transform.GetComponent<Collider>().bounds.Contains(r.drops.ElementAt(i).model.position))
-                                continue;
-
-                            if (!StructureManager.tryGetInfo(r.drops.ElementAt(i).model, out byte x, out byte y, out ushort plant, out StructureRegion region, out StructureDrop index))
-                                continue;
-
-                            StructureManager.instance.channel.send("tellTakeStructure", ESteamCall.ALL, ESteamPacket.UPDATE_RELIABLE_BUFFER, new object[]
-                            {
-                                x,
-                                y,
-                                plant,
-                                index
-                            });
-                        }
-                }
+                if (obj != null)
+                    break;
             }
+
+            if (obj == null)
+                return;
+
+            foreach (BarricadeRegion r in BarricadeManager.regions)
+                for (int i = r.drops.Count - 1; i >= 0; i--)
+                {
+                    if (!obj.transform.GetComponent<Collider>().bounds
+                        .Contains(r.drops.ElementAt(i).model.position))
+                        continue;
+
+                    if (!BarricadeManager.tryGetInfo(r.drops.ElementAt(i).model, out byte x, out byte y,
+                        out ushort plant, out ushort index, out BarricadeRegion region))
+                        continue;
+
+                    BarricadeManager.instance.channel.send("tellTakeBarricade", ESteamCall.ALL,
+                        ESteamPacket.UPDATE_RELIABLE_BUFFER, new object[]
+                        {
+                            x,
+                            y,
+                            plant,
+                            index
+                        });
+                }
+
+            foreach (StructureRegion r in StructureManager.regions)
+                for (int i = r.drops.Count - 1; i >= 0; i--)
+                {
+                    if (!obj.transform.GetComponent<Collider>().bounds
+                        .Contains(r.drops.ElementAt(i).model.position))
+                        continue;
+
+                    if (!StructureManager.tryGetInfo(r.drops.ElementAt(i).model, out byte x, out byte y,
+                        out ushort plant, out StructureRegion region, out StructureDrop index))
+                        continue;
+
+                    StructureManager.instance.channel.send("tellTakeStructure", ESteamCall.ALL,
+                        ESteamPacket.UPDATE_RELIABLE_BUFFER, new object[]
+                        {
+                            x,
+                            y,
+                            plant,
+                            index
+                        });
+                }
         }
 
         public LevelObject LevelObjectFromPosition(Vector3 pos)
@@ -164,10 +170,7 @@ namespace ExtraConcentratedJuice.RealEstate
             if (house.OwnerId == null)
                 return false;
 
-            if (house.OwnerId.Value != player.CSteamID.m_SteamID)
-                return false;
-
-            return true;
+            return house.OwnerId.Value == player.CSteamID.m_SteamID;
         }
 
         private bool NullCheck(LevelObject o) => o.transform != null && o.transform.GetComponent<Collider>() != null;
